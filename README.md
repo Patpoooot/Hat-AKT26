@@ -84,7 +84,3 @@ Optional Julia plots: `Pkg.add("Plots")`. Without it, the notebook prints tables
 - **Source:** UCI Beijing Multi-Site Air Quality; 12 stations, March 2013–February 2017. Compressed raw data is included in Assignments 1–2; no manual extraction is needed.
 - **Split:** train on March 2013–February 2016; reserve March 2016–February 2017 for final evaluation. The virtual sensor excludes PM10.
 - **Fallbacks:** if local raw data is missing, the loaders try UCI, then synthetic data if downloading fails. Assignment 2 falls back to raw training data if its cleaned input is absent. Check the loader messages before interpreting results.
-
-## License
-
-[MIT](LICENSE)
