@@ -3,14 +3,17 @@ using CUDA, LinearAlgebra, Printf, Random
 const TEAM_ID     = 1013
 const SEED        = 2000 + TEAM_ID
 const MODE        = get(ENV, "CHOL_MODE", "explore")
-const SIZES       = MODE == "quick" ? (1000:1000:3000) : (1000:500:7000)
-const NBS         = MODE == "quick" ? (256, 512) : (256, 384, 512, 768, 1024, 1536, 2048)
+intlist(s) = Tuple(parse.(Int, split(s, r"[:,; ]+")))
+const SIZES       = haskey(ENV, "CHOL_SIZES") ? intlist(ENV["CHOL_SIZES"]) :
+                    MODE == "quick" ? (1000:1000:3000) : (1000:500:7000)
+const NBS         = haskey(ENV, "CHOL_NBS") ? intlist(ENV["CHOL_NBS"]) :
+                    MODE == "quick" ? (256, 512) : (256, 384, 512, 768, 1024, 1536, 2048)
 const REPS        = parse(Int, get(ENV, "CHOL_REPS", "3"))
 const TIME_BUDGET = parse(Float64, get(ENV, "CHOL_TIME_BUDGET", "230"))
 const T_START     = time()
 const CSV_FOR     = Dict("quick"   => "results_gpu_team$(TEAM_ID)_quick.csv",
-                         "explore" => "results_gpu_team$(TEAM_ID)_explore.csv",
-                         "final"   => "results_gpu_team$(TEAM_ID).csv")
+                        "explore" => "results_gpu_team$(TEAM_ID)_explore.csv",
+                        "final"   => "results_gpu_team$(TEAM_ID).csv")
 
 tile(i::Int, nb::Int, n::Int) = ((i - 1) * nb + 1):min(i * nb, n)
 chol_flops(n) = n^3 / 3 + n^2 / 2 + n / 6
@@ -212,11 +215,11 @@ function run_benchmarks(; sizes = SIZES, precisions = (Float32, Float64), nbs = 
         A0 = generate_spd(n; T = T)
         b  = A0 * generate_solution(n; T = T)
         trials = configs === nothing ? [(v, nb) for v in variants for nb in nbs if nb < n] :
-                                       get(configs, (string(T), n), Tuple{Symbol,Int}[])
+                                    get(configs, (string(T), n), Tuple{Symbol,Int}[])
         block = NamedTuple[]
         for (variant, nb) in trials
             push!(block, measure("tiled_$(variant)", A -> cholesky_tiled_gpu!(A, nb; variant = variant),
-                                 A0, b; nb = nb, reps = reps))
+                                A0, b; nb = nb, reps = reps))
         end
         push!(block, measure("cusolver", cholesky_cusolver!, A0, b; reps = reps))
         append_csv(csv, block)
@@ -242,8 +245,13 @@ function main()
     haskey(CSV_FOR, MODE) || error("CHOL_MODE must be quick, explore or final (got $MODE)")
     println("mode = $MODE | reps = $REPS | time budget = $(TIME_BUDGET) s")
     MODE == "quick" && CUDA.versioninfo()
-    configs = MODE == "final" ? best_configs(read_csv(get(ENV, "CHOL_EXPLORE_CSV", CSV_FOR["explore"]))) : nothing
-    run_benchmarks(; configs = configs, csv = CSV_FOR[MODE], deadline = T_START + TIME_BUDGET)
+    configs = if MODE == "final"
+        explore_rows = reduce(vcat, read_csv.(split(get(ENV, "CHOL_EXPLORE_CSV", CSV_FOR["explore"]), ":")))
+        best_configs(explore_rows)
+    else
+        nothing
+    end
+    run_benchmarks(; configs = configs, csv = get(ENV, "CHOL_CSV", CSV_FOR[MODE]), deadline = T_START + TIME_BUDGET)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
