@@ -11,9 +11,10 @@ const NBS         = haskey(ENV, "CHOL_NBS") ? intlist(ENV["CHOL_NBS"]) :
 const REPS        = parse(Int, get(ENV, "CHOL_REPS", "3"))
 const TIME_BUDGET = parse(Float64, get(ENV, "CHOL_TIME_BUDGET", "230"))
 const T_START     = time()
-const CSV_FOR     = Dict("quick"   => "results_gpu_team$(TEAM_ID)_quick.csv",
-                        "explore" => "results_gpu_team$(TEAM_ID)_explore.csv",
-                        "final"   => "results_gpu_team$(TEAM_ID).csv")
+const RESULTS_DIR = normpath(joinpath(@__DIR__, "..", "results"))
+const CSV_FOR     = Dict("quick"   => joinpath(RESULTS_DIR, "exploration", "results_gpu_team$(TEAM_ID)_quick.csv"),
+                        "explore" => joinpath(RESULTS_DIR, "exploration", "results_gpu_team$(TEAM_ID)_explore.csv"),
+                        "final"   => joinpath(RESULTS_DIR, "results_gpu_team$(TEAM_ID).csv"))
 
 tile(i::Int, nb::Int, n::Int) = ((i - 1) * nb + 1):min(i * nb, n)
 chol_flops(n) = n^3 / 3 + n^2 / 2 + n / 6
@@ -162,6 +163,7 @@ end
 
 function append_csv(path::AbstractString, rows)
     isempty(rows) && return path
+    mkpath(dirname(path))
     new_file = !isfile(path)
     open(path, "a") do io
         new_file && println(io, join(keys(first(rows)), ","))

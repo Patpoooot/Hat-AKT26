@@ -12,6 +12,8 @@
 
 set -uo pipefail
 cd "${SLURM_SUBMIT_DIR:-$(dirname "$0")}"
+[ -f Project.toml ] || cd ..
+[ -f Project.toml ] || { echo "run from Assignment5/: sbatch slurm/setup_gpu.slurm"; exit 1; }
 export PATH="$HOME/julia-1.12.7/bin:$PATH"
 export JULIA_DEPOT_PATH="$HOME/.julia-aarch64:"
 export JULIA_NUM_PRECOMPILE_TASKS="${JULIA_NUM_PRECOMPILE_TASKS:-8}"
@@ -48,4 +50,4 @@ timeout -s INT 270 julia --project=. --startup-file=no -e '
     println("CUDA functional: ", CUDA.functional())'
 echo "exit code $?"
 echo "setup finished in $(( $(date +%s) - start )) s"
-echo "next: sbatch --export=ALL,CHOL_MODE=quick run_gpu.slurm"
+echo "next: sbatch --export=ALL,CHOL_MODE=quick slurm/run_gpu.slurm"

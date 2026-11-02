@@ -5,7 +5,7 @@ const TARGET = Platform("aarch64", "linux"; libc = "glibc", cxxstring_abi = "cxx
                         tegra = "none", llvm_version = "18")
 const DRY_RUN = get(ENV, "PREFETCH_DRY_RUN", "0") == "1"
 
-Pkg.activate(@__DIR__)
+Pkg.activate(joinpath(@__DIR__, ".."))
 println("target platform: ", triplet(TARGET), DRY_RUN ? " (dry run)" : "")
 
 todo = Tuple{String,String,Dict{String,Any},String}[]

@@ -12,6 +12,8 @@
 
 set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:-$(dirname "$0")}"
+[ -f Project.toml ] || cd ..
+[ -f Project.toml ] || { echo "run from Assignment5/: sbatch slurm/run_gpu.slurm"; exit 1; }
 export PATH="$HOME/julia-1.12.7/bin:$PATH"
 export JULIA_DEPOT_PATH="$HOME/.julia-aarch64:"
 export CHOL_MODE="${CHOL_MODE:-explore}"
@@ -20,5 +22,5 @@ echo "job ${SLURM_JOB_ID:-local} | node $(hostname) | $(uname -m) | mode $CHOL_M
 nvidia-smi --query-gpu=name,driver_version,memory.total,power.limit,clocks.max.sm --format=csv || true
 
 start=$(date +%s)
-julia --project=. --startup-file=no cholesky_gpu.jl
+julia --project=. --startup-file=no src/cholesky_gpu.jl
 echo "julia finished in $(( $(date +%s) - start )) s"

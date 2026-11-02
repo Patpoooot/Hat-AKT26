@@ -2,7 +2,7 @@
 
 **Deadline:** Friday 6 November 2026, 04:00 (GMT+3)
 **Budget:** 3 GPU-hours in total, at most 5 minutes per job. Only running jobs count; logging in and working on the login node is free.
-**Submit:** the performance graph (PNG) + the full path of our Slurm script: `/home/khawarizmi/team1013/AKT_HaT/Assignment5/run_gpu.slurm`
+**Submit:** the performance graph (PNG) + the full path of our Slurm script: `/home/khawarizmi/team1013/AKT_HaT/Assignment5/slurm/run_gpu.slurm`
 **Bonus:** least energy used (measured by AutoHPC per job)
 
 ## The cluster (found on 2 November)
@@ -18,7 +18,7 @@
 | Energy | Slurm records watts on `spark-152`; read it after a job with `sacct` (below) |
 
 Consequences:
-- Login node and GPU node have **different processors**: Julia packages must be installed and compiled **on the GPU node**, which is what `setup_gpu.slurm` does. We keep them in their own folder, `~/.julia-aarch64`.
+- Login node and GPU node have **different processors**: Julia packages must be installed and compiled **on the GPU node**, which is what `slurm/setup_gpu.slurm` does. We keep them in their own folder, `~/.julia-aarch64`.
 - The GB10 runs FP64 at about 1/64 of its FP32 speed and has no FP64 tensor cores. FP64 will be far below FP32 on the graph. This is where the brief's Ozaki hint matters (FP64 accuracy from fast low-precision tensor cores).
 - Never start an interactive GPU app in Open OnDemand (Jupyter, desktop, interactive session): it holds the only GPU and its time keeps counting until it is closed. Only submit batch jobs.
 
@@ -26,9 +26,12 @@ Consequences:
 
 | File | Role |
 |---|---|
-| `cholesky_gpu.jl` | the GPU tiled Cholesky + benchmark; modes `quick`, `explore`, `final` |
-| `run_gpu.slurm` | the job script we submit (and whose path we hand in) |
-| `setup_gpu.slurm` | one-off job: installs and compiles our Julia packages on the ARM GPU node |
+| `src/cholesky_gpu.jl` | the GPU tiled Cholesky + benchmark; modes `quick`, `explore`, `final` |
+| `src/prefetch_artifacts.jl` | downloads the aarch64 CUDA artifacts ahead of time |
+| `slurm/run_gpu.slurm` | the job script we submit (and whose path we hand in) |
+| `slurm/setup_gpu.slurm` | one-off job: installs and compiles our Julia packages on the ARM GPU node |
+| `results/` | final CSV; `results/exploration/` holds the quick, explore and local runs |
+| `figures/` | the performance graph |
 | `Project.toml`, `Manifest-v1.12.toml` | exact package versions for the cluster's Julia 1.12 (`Manifest.toml` is the same for Julia 1.13 on the laptop) |
 | `L2_Cholesky_GPU_AutoHPC_Julia_Notebook_Dos-Kallas.ipynb` | reads the cluster CSVs and draws the final graph |
 
@@ -52,7 +55,7 @@ On the login node:
 cd /home/khawarizmi/team1013
 git clone https://github.com/Patpoooot/AKT_HaT.git
 cd AKT_HaT/Assignment5
-sbatch setup_gpu.slurm
+sbatch slurm/setup_gpu.slurm
 squeue -u $USER
 cat setup1013-<jobid>.out
 ```
@@ -60,7 +63,7 @@ Success = the log ends with `CUDA functional: true` and `setup finished in … s
 
 ## Phase 4 · Quick test (~1 min)
 ```bash
-sbatch --export=ALL,CHOL_MODE=quick run_gpu.slurm
+sbatch --export=ALL,CHOL_MODE=quick slurm/run_gpu.slurm
 ```
 Check the log `chol1013-<jobid>.out`:
 - GPU name `NVIDIA GB10`, `aarch64`
@@ -70,15 +73,15 @@ Check the log `chol1013-<jobid>.out`:
 
 ## Phase 5 · Exploration (≤ 5 min)
 ```bash
-sbatch --export=ALL,CHOL_MODE=explore run_gpu.slurm
+sbatch --export=ALL,CHOL_MODE=explore slurm/run_gpu.slurm
 ```
-Every size × FP32/FP64 × both variants × 7 tile sizes, plus cuSOLVER → `results_gpu_team1013_explore.csv`. If the log says `time budget reached`, run the missing precision in a second job. Then copy the CSV to the laptop (download it from the Open OnDemand file browser, or commit it from the cluster) and decide together: best tile size, `tile` vs `panel`, energy per configuration.
+Every size × FP32/FP64 × both variants × 7 tile sizes, plus cuSOLVER → `results/exploration/results_gpu_team1013_explore.csv`. If the log says `time budget reached`, run the missing precision in a second job. Then copy the CSV to the laptop (download it from the Open OnDemand file browser, or commit it from the cluster) and decide together: best tile size, `tile` vs `panel`, energy per configuration.
 
 ## Phase 6 · Final lean run (~1 min)
 ```bash
-sbatch --export=ALL,CHOL_MODE=final run_gpu.slurm
+sbatch --export=ALL,CHOL_MODE=final slurm/run_gpu.slurm
 ```
-Only the fastest configuration per size + cuSOLVER → `results_gpu_team1013.csv`. This run produces the graph and the energy number we are judged on.
+Only the fastest configuration per size + cuSOLVER → `results/results_gpu_team1013.csv`. This run produces the graph and the energy number we are judged on.
 
 ## Phase 7 · Optional speed-ups (only after Phase 6, budget permitting)
 1. TF32 tensor cores for FP32
@@ -87,9 +90,9 @@ Only the fastest configuration per size + cuSOLVER → `results_gpu_team1013.csv
 Each one: new code, tested on the laptop, then one exploration and one final job.
 
 ## Phase 8 · Graph and submission
-1. Put `results_gpu_team1013.csv` next to the notebook and run it top to bottom.
+1. Put `results_gpu_team1013.csv` in `results/` and run the notebook top to bottom.
 2. Check the GB10 peaks against the spec sheet.
-3. Submit `gpu_cholesky_perf_team1013.png` and `/home/khawarizmi/team1013/AKT_HaT/Assignment5/run_gpu.slurm`.
+3. Submit `figures/gpu_cholesky_perf_team1013.png` and `/home/khawarizmi/team1013/AKT_HaT/Assignment5/slurm/run_gpu.slurm`.
 4. Commit the CSVs and the graph.
 
 ## Checking time and energy after every job
@@ -115,7 +118,7 @@ squeue -u $USER
 ## Saving energy
 - One `explore` and one `final` job, not many small ones: each job also pays Julia's startup.
 - Always pass `quick` before `explore`, so no long job fails halfway.
-- Compile once in `setup_gpu.slurm`, never inside a benchmark job.
+- Compile once in `slurm/setup_gpu.slurm`, never inside a benchmark job.
 - The final run tests one configuration per size, not the whole grid.
 - No interactive GPU sessions, no `watch nvidia-smi`.
 - Submit early: one GPU for all teams means long queues near the deadline.
