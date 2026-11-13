@@ -53,8 +53,8 @@ Done (table above). A teammate already ran `~/hw5/test_gpu.slurm` (jobs 1605, 16
 On the login node:
 ```bash
 cd /home/khawarizmi/team1013
-git clone https://github.com/Patpoooot/AKT_HaT.git
-cd AKT_HaT/Assignment5
+git clone https://github.com/Patpoooot/Hat-AKT26.git
+cd Hat-AKT26/Assignment5
 sbatch slurm/setup_gpu.slurm
 squeue -u $USER
 cat setup1013-<jobid>.out

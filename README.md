@@ -1,4 +1,4 @@
-# AKT_HaT
+# Hat-AKT26
 
 **Al-Khawarizmi Tour · Online Hackathon HPC & AI** · 3 Oct – 7 Nov 2026
 
@@ -21,7 +21,7 @@ Five weekly challenges, from cleaning real air-quality data to a tiled Cholesky 
 ## Repository layout
 
 ```text
-AKT_HaT/
+Hat-AKT26/
 ├── Assignment1/            Week 1 · data preprocessing (Python)
 │   ├── *.ipynb
 │   ├── beijing_air_quality_raw.csv.gz      UCI data, cached by the notebook
@@ -93,8 +93,8 @@ From N = 4000 the tiled version stays within about 15 % of cuSOLVER in FP32 (20 
 ## Getting started
 
 ```sh
-git clone https://github.com/Patpoooot/AKT_HaT.git
-cd AKT_HaT
+git clone https://github.com/Patpoooot/Hat-AKT26.git
+cd Hat-AKT26
 ```
 
 ### Python · Weeks 1–2
