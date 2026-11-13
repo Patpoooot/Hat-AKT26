@@ -1,0 +1,12 @@
+# Python
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Course material from the organizers (not ours to share)
+Assignment*/Notes/*
+!Assignment5/Notes/HPC_PLAN.md
