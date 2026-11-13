@@ -18,8 +18,6 @@ Five weekly challenges, from cleaning real air-quality data to a tiled Cholesky 
 | 4 | GPU programming: Hello World, AXPY, dot, GER, batched GEMM, each against cuBLAS | CUDA C++ | Hand-written kernels checked against a CPU reference | [Code](Assignment4/akt26_gpu_dev/) |
 | 5 | Green Speed Run: tiled Cholesky on a GPU cluster | Julia, CUDA.jl, Slurm | 2,490 GFlop/s FP32 on the GB10, every run passes η ≤ 10Nε | [Notebook](Assignment5/L2_Cholesky_GPU_AutoHPC_Julia_Notebook_Dos-Kallas.ipynb) · [Code](Assignment5/src/cholesky_gpu.jl) |
 
-Lecture slides, notes and briefs are in each assignment's `Notes/` folder.
-
 ## Repository layout
 
 ```text
@@ -27,20 +25,16 @@ AKT_HaT/
 ├── Assignment1/            Week 1 · data preprocessing (Python)
 │   ├── *.ipynb
 │   ├── beijing_air_quality_raw.csv.gz      UCI data, cached by the notebook
-│   ├── beijing_merged_team1013.csv.gz      our team's corrupted export
-│   └── Notes/                              slides, notes, assignment details (HTML)
+│   └── beijing_merged_team1013.csv.gz      our team's corrupted export
 ├── Assignment2/            Week 2 · AI methods (Python)
 │   ├── *.ipynb
-│   ├── beijing_clean_team1013.csv.gz       cleaned output of Week 1
-│   └── Notes/
+│   └── beijing_clean_team1013.csv.gz       cleaned output of Week 1
 ├── Assignment3/            Week 3 · CPU Cholesky (Julia)
 │   ├── *.ipynb
 │   ├── bench_team1013.csv                  benchmark rows
-│   ├── results_team1013.json               results, answers and checks for grading
-│   └── Notes/
+│   └── results_team1013.json               results, answers and checks for grading
 ├── Assignment4/            Week 4 · CUDA C++
-│   ├── akt26_gpu_dev/0-hello-world … 4-gemm/   one folder and makefile per exercise
-│   └── Notes/
+│   └── akt26_gpu_dev/0-hello-world … 4-gemm/   one folder and makefile per exercise
 └── Assignment5/            Week 5 · GPU Cholesky on the AutoHPC cluster (Julia)
     ├── *.ipynb                             checks, tile-size sweep, final graph
     ├── Project.toml, Manifest*.toml        pinned CUDA.jl 6.5 (Julia 1.12 and 1.13)
@@ -178,6 +172,6 @@ The notebook runs from `Assignment5/` and needs `Plots` in your default Julia en
 
 ## Data & license
 
-Weeks 1–2 use the [UCI Beijing Multi-Site Air Quality](https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data) dataset (Zhang et al., 2017, *Proc. R. Soc. A*). Course material in the `Notes/` folders belongs to its authors.
+Weeks 1–2 use the [UCI Beijing Multi-Site Air Quality](https://archive.ics.uci.edu/dataset/501/beijing+multi+site+air+quality+data) dataset (Zhang et al., 2017, *Proc. R. Soc. A*). The lecture slides, notes and assignment briefs belong to the hackathon organizers and are not included in this repository.
 
 Our code is available under the [MIT License](LICENSE).
